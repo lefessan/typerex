@@ -32,7 +32,7 @@ begin library "ocplib-system"
     "ocpSystem.ml";
 
     "configParser.ml"
-    "simpleConfig.ml" (pp = [ "camlp4o" ])
+    "simpleConfig.ml" (pp = [ "camlp4o.opt" ])
    ]
 
 

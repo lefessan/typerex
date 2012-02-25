@@ -189,17 +189,17 @@ let modified_file old diff =
 let read_unmodified_file file = [Same (String.concat "" (lines_of file))]
 
 let read_modified_file ?(empty_absent = true) old_file new_file =
-  let open Filename in
   match Sys.file_exists old_file, Sys.file_exists new_file with
     | true, true ->
       if old_file = new_file then
         read_unmodified_file old_file
       else
       let diff_file =
-	temp_file (basename new_file ^ "-" ^ basename old_file) ".diff" in
+	Filename.temp_file
+          (Filename.basename new_file ^ "-" ^ Filename.basename old_file) ".diff" in
       let command =
-        "diff -f " ^ quote old_file ^ " " ^ quote new_file
-	^ " >" ^ quote diff_file
+        "diff -f " ^ Filename.quote old_file ^ " " ^ Filename.quote new_file
+	^ " >" ^ Filename.quote diff_file
       in
       debugln "%f: invoking %s" (Unix.gettimeofday ()) command;
       (match

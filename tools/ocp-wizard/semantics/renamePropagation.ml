@@ -167,7 +167,12 @@ let constraints_fields redefs =
       redefs := (c, c') :: !redefs)
 
 (* Collect the set of signature inclusion constraints implied by a typedtree. *)
-let collect_signature_inclusions {errors; incs; pers; includes; redefs} file s =
+let collect_signature_inclusions {errors = errors;
+                                  incs = incs;
+                                  pers = pers;
+                                  includes = includes;
+                                  redefs = redefs;
+                                 } file s =
   let process loc cons = fdebugln "%a\nprocessing %s" Location.print loc cons in
   let constraint_modtype = constraint_modtype ?errors in
   let enter node =
@@ -231,11 +236,11 @@ let collect_signature_inclusions {errors; incs; pers; includes; redefs} file s =
             | Modtype_abstract -> ())
         | Tmty_with (mt, cs) ->
           warn "propagation for with constraints not implemented"
-        | Tmty_typeof {mod_env ; mod_type} ->
+        | Tmty_typeof {mod_env = mod_env ; mod_type = mod_type} ->
           process t.mty_loc "mty_typeof";
           constraint_modtype incs mod_env mod_type t.mty_env t.mty_type)
 
-    | `structure_item {str_desc = Tstr_include (m, ids) ; str_loc } ->
+    | `structure_item {str_desc = Tstr_include (m, ids) ; str_loc = str_loc } ->
 	  (* We may have
   	     module G(X : sig module type T module X : T end) =
              struct include X end *)
@@ -245,7 +250,8 @@ let collect_signature_inclusions {errors; incs; pers; includes; redefs} file s =
 	     includes := IncludeSet.add (sign, ids) !includes
 	   with Abstract_modtype -> ())
 
-    | `signature_item {sig_desc = Tsig_include (mt, sg) ; sig_loc ; sig_env } ->
+    | `signature_item {sig_desc = Tsig_include (mt, sg) ;
+                       sig_loc = sig_loc; sig_env = sig_env } ->
 
           process sig_loc "sig_include";
 	  (try
@@ -292,7 +298,9 @@ let collect_signature_inclusions {errors; incs; pers; includes; redefs} file s =
 
 let constrain_one_file
     ~fail_fast program (prefix, source_kind as file) source_file =
-  let {errors; incs; mli_incs; includes; redefs} as constraints =
+  let {errors = errors; incs = incs;
+       mli_incs = mli_incs; includes = includes;
+       redefs = redefs } as constraints =
     empty ~fail_fast in
   let filename = source_file.Program.source in
   try_do ?errors ~prefix:(Printf.sprintf "File %s: " filename)
@@ -325,7 +333,9 @@ let constrain_one_file
 
 let constrain_pack ~fail_fast program prefix unit =
   let sg, units = ProgramCache.pack program unit in
-  let {errors; incs; mli_incs; includes; redefs} as constraints =
+  let {errors = errors; incs = incs;
+       mli_incs = mli_incs;
+       includes = includes; redefs = redefs } as constraints =
     empty ~fail_fast in
   try_do ?errors ~prefix:(Printf.sprintf "In pack module %s: " prefix)
     (function () ->
@@ -431,25 +441,24 @@ end = struct
   type 'a t = ('a, 'a list ref) Hashtbl.t
 
   let add eq x y =
-    let open Hashtbl in
-	match x, y, mem eq x, mem eq y with
+	match x, y, Hashtbl.mem eq x, Hashtbl.mem eq y with
 	  | _, _, false, false ->
 	    let l = ref [x ; y] in
-	    add eq x l;
-	    add eq y l
+	    Hashtbl.add eq x l;
+	    Hashtbl.add eq y l
 	  | _, _, true, true ->
-	    let lx = find eq x and ly = find eq y in
+	    let lx = Hashtbl.find eq x and ly = Hashtbl.find eq y in
 	    if lx !=  ly then (
 	      lx := List.rev_append !ly !lx;
 	      List.iter
-		(fun y -> replace eq y lx)
+		(fun y -> Hashtbl.replace eq y lx)
 		!ly
 	    )
 	  | x, y, true, false
 	  | y, x, false, true ->
-	    let x = find eq x in
+	    let x = Hashtbl.find eq x in
 	    x := y :: !x;
-	    add eq y x
+	    Hashtbl.add eq y x
 
   let map f eq =
     let eq' = Hashtbl.create 10 in

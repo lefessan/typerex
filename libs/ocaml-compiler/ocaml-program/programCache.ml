@@ -15,13 +15,15 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Location
+open Lexing
 open Typedtree
 open Program
 include Debug.Tag(struct let tag = "programCache" end)
 
 let modtime f =
   if Sys.file_exists f then
-    Unix.((stat f).st_mtime)
+    (Unix.stat f).Unix.st_mtime
   else
     -. max_float
 
@@ -122,7 +124,7 @@ let read =
         Some (Cmi_file.read_cmi file), None, None
       else
         Profile.time_call "read cmt" Cmt_format.read file)
-  
+
 (* The following two functions are copied from [Cmt_format]. *)
 
 (* Return the external interface info in a cmi, cmt(if no cmti), or cmt file. *)
@@ -152,7 +154,7 @@ let read_cmi cm =
 (* Return the typedtree info in a cmt(i) file *)
 let read_cmt filename =
   match read filename with
-      _, None, _ -> raise Cmt_format.(Error (Not_a_typedtree filename))
+      _, None, _ -> raise (Cmt_format.Error (Cmt_format.Not_a_typedtree filename))
     | _, Some cmt, source -> cmt, source
 
 let read_typedtree file =
@@ -223,7 +225,7 @@ exception ExistingIgnoredCmti of string * compilation_unit
 (* return a prefix, and kind *)
 let modname2unit modname =
   let program = program () in
-  let load_path = 
+  let load_path =
     try
       let source = current_source () in
       Some (source_load_path program source)
@@ -280,7 +282,7 @@ let unit2cmi prefix = function
         | Pack {p_interface = Some source} ->
           NoCmt source,
           typedtree ~prefix:`absolute (program ()) source
-        | Pack ({p_interface = None ; p_typedtree} as unit)->
+        | Pack ({p_interface = None ; p_typedtree = p_typedtree} as unit)->
           NoCmtPack unit,
           Program.prefix_with ~prefix:`absolute (program ()) p_typedtree
         | Concrete _ -> assert false
@@ -532,7 +534,6 @@ let last_cnum2old_lc program source pos =
 
 let translate_loc shift target program loc =
   let origin = match target with `last -> `old | `old -> `last in
-  let open Location in let open Lexing in
   try
     let source = source_id_of_loc program loc in
     fdebug "translating location (cnum = %d) %a"
@@ -548,7 +549,7 @@ let translate_loc shift target program loc =
       debugln "lnum_cnum = %d" lnum_cnum;
       let lnum_cnum = translate (shift `char) program source lnum_cnum in
       let pos_lnum, chars = Diff.cnum2lnum target chunks lnum_cnum in
-      { pos with pos_cnum = lnum_cnum ; pos_lnum ; pos_bol = lnum_cnum - chars }
+      { pos with pos_cnum = lnum_cnum ; pos_lnum = pos_lnum ; pos_bol = lnum_cnum - chars }
     in
     let loc =
       { loc with

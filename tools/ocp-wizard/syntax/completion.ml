@@ -15,6 +15,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Parser
 open OcpLang
 open OcamlTokenize
 open Util
@@ -114,7 +115,6 @@ let rec member_or_field = function
   | before -> Short [Env_untyped.Label]
 
 let ident_completion_context preceeding =
-  let open Parser in
   (match preceeding with
     | [] -> debugln "no preceeding token"
     | t :: _ ->
@@ -182,7 +182,7 @@ let insert_token env bound before token =
             (function kind, map as entry ->
               if List.mem kind kinds then
                 kind, StringMap.add id bound map
-              else 
+              else
                 entry)
             env.idents
         and opens =
@@ -191,7 +191,7 @@ let insert_token env bound before token =
             (* This is wrong with open M.N *)
               id :: env.opens
             | _ -> env.opens)
-        in {idents ; opens}
+        in {idents = idents; opens = opens}
       else env
     | _ -> env
 
@@ -225,7 +225,7 @@ let local_env contents local_env pos =
   local_env.local_env.(pos)
 
 let collect_in_buffer ~prefix contents local_envs pos =
-  let {idents ; opens} = local_env contents local_envs pos in
+  let {idents = idents ; opens = opens} = local_env contents local_envs pos in
   List.map
     (function kind, map ->
       let l =

@@ -56,14 +56,14 @@ let current_ctx = ref no_ctx
 
 let set_context modname kind sourcefile =
   current_ctx := {
-    modname;
-    kind;
+    modname = modname;
+    kind = kind;
     source_digest = Digest.file sourcefile
   }
 
 let set_pack_context modname =
   current_ctx := {
-    modname;
+    modname = modname;
     kind = `pack;
     source_digest = ""
   }
@@ -74,7 +74,7 @@ let currentstamp = ref 0
 
 let create_with_ctx ctx s =
   incr currentstamp;
-  { name = s; stamp = !currentstamp; flags = 0; ctx }
+  { name = s; stamp = !currentstamp; flags = 0; ctx = ctx }
 
 let create s =
   incr currentstamp;

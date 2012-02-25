@@ -1297,7 +1297,8 @@ and type_expect ?in_function env sexp ty_expected =
                 in
                 Texp_instvar(self_path, path,
                              match lid.txt with
-                                 Longident.Lident txt -> { txt; loc = lid.loc }
+                                 Longident.Lident txt ->
+                                   { txt = txt; loc = lid.loc }
                                | _ -> assert false)
             | Val_self (_, _, cl_num, _) ->
                 let (path, _) =
@@ -1353,14 +1354,14 @@ and type_expect ?in_function env sexp ty_expected =
          {ppat_loc = default_loc;
           ppat_desc =
             Ppat_construct
-              (mknoloc (Longident.(Ldot (Lident "*predef*", "Some"))),
+              (mknoloc (Longident.Ldot (Longident.Lident "*predef*", "Some")),
                Some {ppat_loc = default_loc; ppat_desc = Ppat_var (mknoloc "*sth*")},
                false)},
          {pexp_loc = default_loc;
           pexp_desc = Pexp_ident(mknoloc (Longident.Lident "*sth*"))};
          {ppat_loc = default_loc;
           ppat_desc = Ppat_construct
-             (mknoloc (Longident.(Ldot (Lident "*predef*", "None"))),
+             (mknoloc (Longident.Ldot (Longident.Lident "*predef*", "None")),
               None, false)},
          default;
       ] in

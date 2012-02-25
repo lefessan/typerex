@@ -491,7 +491,7 @@ and simple_pattern ppf x =
   | Ppat_construct (li, None, _) ->
       fprintf ppf "%a@ " fmt_longident li
   | Ppat_any -> fprintf ppf "_";            (* OXX done *)
-  | Ppat_var ({txt}) ->
+  | Ppat_var ({txt = txt}) ->
       if (is_infix (fixity_of_string txt)) || List.mem txt.[0] prefix_symbols then
         fprintf ppf "(%s)" txt                (* OXX done *)
       else

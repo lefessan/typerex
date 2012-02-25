@@ -125,7 +125,7 @@ let create_package_mty fake loc env (p, l) =
                ptype_manifest = if fake then None else Some t;
                ptype_variance = [];
                ptype_loc = loc} in
-      {pmty_desc=Pmty_with (mty, [ { txt = Longident.Lident s.txt; loc }, Pwith_type d ]);
+      {pmty_desc=Pmty_with (mty, [ { txt = Longident.Lident s.txt; loc = loc }, Pwith_type d ]);
        pmty_loc=loc}
     )
     {pmty_desc=Pmty_ident p; pmty_loc=loc}

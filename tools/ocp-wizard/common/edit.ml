@@ -192,7 +192,7 @@ and frame = {
 let empty_undo = Stack.create
 
 let check_undo stack =
-  let {name ; changes} = Stack.top stack in
+  let {name = name ; changes = changes} = Stack.top stack in
   name,
   List.filter_map
     (function file, _, hash, origin ->
@@ -211,7 +211,7 @@ let check_undo stack =
     changes
 
 let undo_last stack =
-  let {name ; changes} = Stack.top stack in
+  let {name = name; changes = changes} = Stack.top stack in
   let all_renames =
     List.map
       (function file, contents, _, origin ->
@@ -273,4 +273,4 @@ let edit_files stack name edits renames =
       edit_renames
   in
   perform_renames [] (edit_renames @ renames);
-  Stack.push {name ; changes = undo_edits @ undo_renames} stack
+  Stack.push {name = name; changes = undo_edits @ undo_renames} stack

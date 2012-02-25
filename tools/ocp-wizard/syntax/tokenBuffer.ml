@@ -64,14 +64,18 @@ let create size t_size state =
     t_pre = 0;
     t_post = t_size;
     offset = 0;
-    state
+    state = state;
   }
 
-let t_dump { t_buf ; t_pre ; t_post ; offset } c =
+let t_dump { t_buf = t_buf;
+             t_pre = t_pre ;
+             t_post = t_post ;
+             offset = offset } c =
   Printf.fprintf c "|t_buf|=%d, t_pre=%d, t_post=%d, offset=%d"
     (Array.length t_buf) t_pre t_post offset
 
-let t_snapshot { t_buf ; t_pre ; t_post ; offset } c =
+let t_snapshot { t_buf = t_buf ; t_pre = t_pre ;
+                 t_post = t_post ; offset = offset } c =
   let print i = Printf.fprintf c "%s|" (string t_buf.(i)) in
   Printf.fprintf c "...|";
   for i = max 0 (t_pre - 11) to t_pre - 1 do print i done;
@@ -151,7 +155,7 @@ let pos_bont buffer pos =
   else
     pos + length buffer.t_buf.(buffer.t_post) - buffer.offset
 
-let sub ({t_buf ; t_pre ; t_post} as tb) b e =
+let sub ({t_buf = t_buf ; t_pre = t_pre ; t_post = t_post} as tb) b e =
   let len = e - b in
   let e = pos2pointer tb e in
   let s = Array.create len t_pad in

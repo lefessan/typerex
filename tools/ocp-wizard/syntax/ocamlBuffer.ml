@@ -41,8 +41,8 @@ let find_or_create ?(init= function () -> raise Not_found) buffername =
   with Not_found ->
     let filename, program = Profile.time_call "init buffer" init () in
     let state = {
-      filename;
-      program;
+      filename = filename;
+      program = program;
       local_envs = Completion.initial_env ();
       contents = empty ();
       needs_refontifying = None;
@@ -55,7 +55,7 @@ let update_buffer buff ~start ~old_length first_time s =
   let start', end', t_start, t_end =
     update_buffer buff.contents ~start ~old_length first_time s in
   let updated =
-    let {chars} = buff.contents in
+    let {chars = chars} = buff.contents in
     let start, end_ =
       match buff.needs_refontifying with
         | Some (start, end_) ->

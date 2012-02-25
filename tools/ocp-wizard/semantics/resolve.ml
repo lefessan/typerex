@@ -127,7 +127,7 @@ let sig_item_descr = function
     | Sig_class (_, d, _) -> DClass d
     | Sig_class_type (_, d, _) -> DCltype d
     | Sig_exception (_, cstr_args) ->
-      DConstructor {cstr_args ; cstr_full = None}
+      DConstructor {cstr_args = cstr_args ; cstr_full = None}
 
 (* Get the ident of a summary item, if it has one, and matches the kind. *)
 let summary_item kind item =
@@ -150,7 +150,7 @@ let summary_item_descr = function
   | Env_class (e, _, d) -> e, DClass d
   | Env_cltype (e, _, d) -> e, DCltype d
   | Env_exception (e, _, cstr_args) ->
-    e, DConstructor {cstr_args ; cstr_full = None}
+    e, DConstructor {cstr_args = cstr_args ; cstr_full = None}
   | Env_open _ | Env_empty -> invalid_arg "summary_item_descr"
 
 (*
@@ -255,12 +255,15 @@ let first_of_in_type_decl kind names tdecl =
     | Constructor, Type_variant constrs ->
       List.iter
 	(function id, cstr_args, _ ->
-          first_of_in_id names id (DConstructor {cstr_args ; cstr_full = None}))
+          first_of_in_id names id (DConstructor
+                                     {cstr_args = cstr_args ; cstr_full = None}))
 	constrs
     | Label, Type_record (fields, _) ->
       List.iter
 	(function id, lbl_mut, lbl_arg ->
-          first_of_in_id names id (DLabel {lbl_mut; lbl_arg ; lbl_full = None}))
+          first_of_in_id names id (DLabel {lbl_mut = lbl_mut;
+                                           lbl_arg = lbl_arg ;
+                                           lbl_full = None}))
 	fields
     | _ -> ()
 

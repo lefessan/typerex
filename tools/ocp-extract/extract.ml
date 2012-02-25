@@ -226,7 +226,7 @@ module Structure = struct
               | x    -> x
           else
             None
-      | { pstr_loc } as i -> if ParseOCaml.contains pstr_loc p then Some i else None in
+      | { pstr_loc = pstr_loc } as i -> if ParseOCaml.contains pstr_loc p then Some i else None in
     List.find_map aux ast
 
   let get_module ast name =
@@ -305,7 +305,7 @@ module Signature = struct
     and aux = function
       | { psig_desc = Psig_module (_,m) }  as i -> contains (fun () -> module_find aux m) i
       | { psig_desc = Psig_modtype (_,m) } as i -> contains (fun () -> modtype_find aux m) i
-      | { psig_loc } as i -> if ParseOCaml.contains psig_loc p then Some i else None in
+      | { psig_loc = psig_loc } as i -> if ParseOCaml.contains psig_loc p then Some i else None in
     List.find_map aux ast
 
   let get_module ast name =

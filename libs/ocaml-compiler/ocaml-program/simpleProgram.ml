@@ -131,10 +131,9 @@ let prefix_by l name =
     name
 
 let classify_source f =
-  let open Filename in
-    if check_suffix f ".ml" then `ml
-    else if check_suffix f ".mli" then `mli
-    else if check_suffix f ".mll" || check_suffix f ".mly" then
+    if Filename.check_suffix f ".ml" then `ml
+    else if Filename.check_suffix f ".mli" then `mli
+    else if Filename.check_suffix f ".mll" || Filename.check_suffix f ".mly" then
       `ml
     else
       `other
@@ -179,10 +178,10 @@ let project_dirs ~permissive ~ignore_project_file ~default_cwd ~stdlib file =
     let absolute_root, pf, root2here, here2root =
       find_project_file absolute_dir in
     let project_file = parse_project_file ~permissive pf in
-    { absolute_root;
-      here2root;
+    { absolute_root = absolute_root;
+      here2root = here2root;
       project_file = Some pf;
-      root2here;
+      root2here = root2here;
       dirs = project_file.source_dirs;
       incs =
         List.map (Misc.expand_directory stdlib) project_file.include_dirs
@@ -258,7 +257,6 @@ let cmt2packed_units ~root file =
 (* Given a project description, return the set of compilation units
    contained in those directories. *)
 let project_units ~inc ~root dirs =
-  let open Filename in
   let units =
     List.fold_left
       (fun files d ->
@@ -270,14 +268,14 @@ let project_units ~inc ~root dirs =
 	    List.filter_map
 	      (function f ->
 	        if not inc &&
-	          (List.exists (check_suffix f)
+	          (List.exists (Filename.check_suffix f)
                      [".ml" ; ".mli" ; ".mly" ; ".mll" ; ".mlpack"] ||
-                     check_suffix f ".cmt" &&
+                     Filename.check_suffix f ".cmt" &&
                      cmt2packed_units ~root (concat_if_relative d f) <> None)
 	          || inc &&
-	          List.exists (check_suffix f) [".cmt" ; ".cmti" ; ".cmi"]
+	          List.exists (Filename.check_suffix f) [".cmt" ; ".cmti" ; ".cmi"]
 	        then
-	          Some (concat d (chop_extension f))
+	          Some (Filename.concat d (Filename.chop_extension f))
 	        else
 	          None)
 	      fs
@@ -371,7 +369,7 @@ let mlpack2units ~root file =
       with Not_found ->
         (* There should be a warning *)
         concat_if_relative dir (String.uncapitalize modname))
-    paths  
+    paths
 
 let packed_units ~root file =
   if Filename.check_suffix file ".mlpack" then
@@ -418,9 +416,9 @@ let read_one_unit ~root ?assume ~load_path ~exclude prefix ~inc =
 	in
 	{
 	  source = source;
-	  preprocessor;
+	  preprocessor = preprocessor;
 	  nopervasives = false; (* stub *)
-	  load_path;
+	  load_path = load_path;
 	  typedtree = prefix ^ source_kind2cmt_suffix kind;
 	}
       )
@@ -438,7 +436,7 @@ let read_one_unit ~root ?assume ~load_path ~exclude prefix ~inc =
                 `pack {
                   p_interface = interface;
                   p_load_path = load_path;
-                  p_units;
+                  p_units = p_units;
                   p_typedtree = prefix ^ ".cmt"
                 }
               | None -> `none)
@@ -447,13 +445,13 @@ let read_one_unit ~root ?assume ~load_path ~exclude prefix ~inc =
   if implementation = `none && interface = None || inc then
     match first_existing [".cmti" ; ".cmt" ; ".cmi"] with
       | Some (a_signature, _) ->
-        Some (prefix, Abstract { a_load_path = load_path ; a_signature })
+        Some (prefix, Abstract { a_load_path = load_path ; a_signature = a_signature })
       | None -> None
   else
     let unit =
       match implementation with
-        | `impl impl -> Concrete { implementation = Some impl ; interface }
-        | `none -> Concrete { implementation = None ; interface }
+        | `impl impl -> Concrete { implementation = Some impl ; interface = interface }
+        | `none -> Concrete { implementation = None ; interface = interface }
         | `pack p -> Pack p
     in
     Some (prefix, unit)
@@ -483,7 +481,7 @@ let assign_cmts_to_unit first root cmts assigned_cmts prefix =
     | None -> None
   in
   function
-    | Concrete { implementation ; interface } ->
+    | Concrete { implementation = implementation; interface = interface } ->
       Concrete {
         implementation = assign `ml implementation;
         interface = assign `mli interface

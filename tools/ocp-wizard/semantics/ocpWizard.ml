@@ -15,6 +15,8 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Location
+open Lexing
 open OcpLang
 open Util
 open Location
@@ -168,11 +170,10 @@ let id2comments program id =
   let comments =
     try
       let loc = FindName.id2loc ~accept_none:false program id in
-      let open Location in let open Lexing in
       let pos_fname = Program.file_of_loc ~prefix:`absolute program loc in
       let loc = { loc with
-        loc_start = { loc.loc_start with pos_fname };
-        loc_end = { loc.loc_end with pos_fname } } in
+        loc_start = { loc.loc_start with pos_fname = pos_fname };
+        loc_end = { loc.loc_end with pos_fname = pos_fname } } in
       fdebugln "get comment in %a" print loc;
       Extract.get_comments_permissive
         ~odoc:false loc

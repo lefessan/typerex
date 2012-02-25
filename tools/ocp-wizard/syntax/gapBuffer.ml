@@ -45,10 +45,10 @@ let create size =
     marks_after = []
   }
 
-let dump { buf ; pre ; post ; line } c =
+let dump { buf = buf ; pre = pre ; post = post ; line = line } c =
   Printf.fprintf c "|buf|=%d, pre=%d, post=%d, line=%d" (String.length buf) pre post line
 
-let snapshot { buf ; pre ; post } c =
+let snapshot { buf = buf ; pre = pre ; post = post } c =
   let print i = Printf.fprintf c "%c" buf.[i] in
   Printf.fprintf c "...";
   for i = max 0 (pre - 20) to pre - 1 do print i done;
@@ -63,7 +63,7 @@ let clear gb =
   gb.marks_before <- [];
   gb.marks_after <- []
 
-let contents {buf ; pre ; post} =
+let contents {buf = buf ; pre = pre ; post = post} =
   let s = String.create (pre + String.length buf - post) in
   String.blit buf 0 s 0 pre;
   String.blit buf post s pre (String.length buf - post);
@@ -117,7 +117,7 @@ let delete_mark gb m =
     invalid_arg "delete_mark";
   m := -1
 
-let substring ({buf ; pre ; post} as gb) b e =
+let substring ({buf = buf; pre = pre ; post = post} as gb) b e =
   if b < 0 || e > pre + String.length buf - post then
     invalid_arg "substring";
   debugln "substring";
@@ -143,7 +143,7 @@ let resize gb =
   gb.post <- len + gb.post;
   List.iter (function m -> m := !m + len) gb.marks_after
 
-let forward ({buf ; pre ; post} as gb) =
+let forward ({buf = buf ; pre = pre ; post = post} as gb) =
   if buf.[post] = '\n' then
     gb.line <- gb.line + 1;
   buf.[pre] <- buf.[post];
@@ -160,7 +160,7 @@ let forward ({buf ; pre ; post} as gb) =
   gb.pre <- gb.pre + 1;
   gb.post <- gb.post + 1
 
-let backward ({buf} as gb) =
+let backward ({buf = buf} as gb) =
   gb.pre <- gb.pre - 1;
   gb.post <- gb.post - 1;
   buf.[gb.post] <- buf.[gb.pre];

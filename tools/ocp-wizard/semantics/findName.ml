@@ -35,7 +35,7 @@ let get_lids ?fname typedtree cond =
       in
       let lid = text.txt in
       if cond lid loc then
-	Some ({text with loc}, lid, (env, kind))
+	Some ({text with loc = loc}, lid, (env, kind))
       else
 	None)
     (find_all_paths typedtree)
@@ -64,7 +64,7 @@ let collect_lids_in_program ?errors filter program =
 let innermost_lids ?fname typedtree cond included =
   let lids = get_lids ?fname typedtree cond in
   List.filter
-    (function {loc}, _, _ ->
+    (function {loc = loc}, _, _ ->
       not
         (List.exists
            (function {loc = loc'}, _, _ ->
@@ -141,7 +141,7 @@ let locate_defs program ids =
 	  let source_file = Program.find_source program f in
 	  let typedtree = ProgramCache.typedtree program source_file in
 	  List.iter
-	    (function _, _, {loc ; txt = id} ->
+	    (function _, _, {loc = loc ; txt = id} ->
               let loc = Program.correct_fname source_file.Program.source loc in
 	      let loc = ProgramCache.old2last_loc program loc in
 	      add_to (`ident_at (f, loc, id)) inside)

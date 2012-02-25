@@ -214,6 +214,8 @@ let token2face token before after =
     | COMMENT _
       -> raise Not_found
 
+open Odoc_types
+
 let ocamldoc2faces b e contents =
   try
     let contents = String.sub contents 3 (String.length contents - 5) in
@@ -232,7 +234,7 @@ let ocamldoc2faces b e contents =
            let b = b+3+b'
            and e = b+3+e' in
            try
-             let open Odoc_types in
+(*             let open Odoc_types in *)
              match elt with
                | Raw _ -> [b, e, doc]
                | Title _ -> [b, e, doc_title]

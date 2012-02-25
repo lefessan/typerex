@@ -845,12 +845,12 @@ and class_expr cl_num val_env met_env scl =
       let loc = default.pexp_loc in
       let scases =
         [{ppat_loc = loc; ppat_desc =
-          Ppat_construct(mknoloc (Longident.(Ldot (Lident"*predef*", "Some"))),
+          Ppat_construct(mknoloc (Longident.Ldot (Longident.Lident"*predef*", "Some")),
                          Some{ppat_loc = loc; ppat_desc = Ppat_var (mknoloc "*sth*")},
                          false)},
          {pexp_loc = loc; pexp_desc = Pexp_ident(mknoloc (Longident.Lident"*sth*"))};
          {ppat_loc = loc; ppat_desc =
-          Ppat_construct(mknoloc (Longident.(Ldot (Lident"*predef*", "None"))),
+          Ppat_construct(mknoloc (Longident.Ldot (Longident.Lident"*predef*", "None")),
                          None, false)},
          default] in
       let smatch =

@@ -88,9 +88,9 @@ let node2loc = function
   | `structure_item i -> i.str_loc
   | `signature_item i -> i.sig_loc
   | `type_declaration d -> d.typ_loc
-  | `class_type_declaration { ci_loc }
-  | `class_declaration { ci_loc }
-  | `class_description { ci_loc } -> ci_loc
+  | `class_type_declaration { ci_loc = ci_loc }
+  | `class_declaration { ci_loc = ci_loc }
+  | `class_description { ci_loc = ci_loc } -> ci_loc
   | _ -> raise Not_found
 
 let find_map_fun f included_in node =

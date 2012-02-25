@@ -35,7 +35,7 @@ let pivot_level = 2 * lowest_level - 1
 let new_id = ref (-1)
 
 let newty2 level desc  =
-  incr new_id; { desc; level; id = !new_id }
+  incr new_id; { desc = desc; level = level; id = !new_id }
 let newgenty desc      = newty2 generic_level desc
 let newgenvar ?name () = newgenty (Tvar name)
 (*
@@ -324,8 +324,8 @@ let unmark_type_decl decl =
   begin match decl.type_kind with
     Type_abstract -> ()
   | Type_variant cstrs ->
-      List.iter 
-	(fun (c, tl, ret_type_opt) -> 
+      List.iter
+	(fun (c, tl, ret_type_opt) ->
 	  List.iter unmark_type tl;
 	  Misc.may unmark_type ret_type_opt)
 	cstrs

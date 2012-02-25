@@ -50,14 +50,14 @@ let add_command lang cmd =
     l.commands <- Obj.magic cmd :: l.commands;
   else
     let l = {
-      lang;
+      lang = lang;
       commands = [Obj.magic cmd];
       keymap   = if cmd.keys = [] then [] else [cmd.name, cmd.keys]
     }in
     lang_tbl := (lang, l) :: !lang_tbl
 
 let create_command ~lang ~name ~doc ?(keys=[]) code =
-  let cmd = { name; doc; keys; code } in
+  let cmd = { name = name; doc = doc; keys = keys; code = code } in
   add_command lang cmd;
   cmd
 
@@ -70,7 +70,7 @@ let save ~lang ~code_of_command ~code_of_keymap ~filename =
     @ [code_of_keymap l.keymap] in
   let lines = List.intercalate [ ""; ""] lines in
   File.file_of_lines filename lines
-  
+
 module type Lang = sig
 
   val lang : string

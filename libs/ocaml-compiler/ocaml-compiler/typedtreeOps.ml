@@ -15,6 +15,11 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Env
+open Types
+open Location
+open Env_untyped
+
 open Asttypes
 open Typedtree
 open TypedtreeIter
@@ -171,11 +176,11 @@ let find_all_map cond s =
   iterator ~enter ~leave s;
   List.rev !l
 
-let find_map priority (type a) cond s =
-  let module M = struct exception Found of a end in
+let find_map priority cond s =
+  let result = ref None in
   let visit x =
     match cond x with
-      | Some x -> raise (M.Found x)
+      | Some x -> result := Some x; raise Exit
       | None -> ()
   in
   let enter, leave = match priority with
@@ -186,7 +191,8 @@ let find_map priority (type a) cond s =
     iterator ~leave ~enter s;
     raise Not_found
   with
-      M.Found x -> x
+      Exit ->
+        match !result with None -> assert false | Some x -> x
 
 let find_map_pattern priority cond =
   find_map priority (function `pattern p -> cond p | _ -> None)
@@ -195,16 +201,15 @@ let find_map_expression priority cond =
   find_map priority (function `expression e -> cond e | _ -> None)
 
 let apply2paths f =
-  let open Env in
  function
-    | `pattern {pat_desc ; pat_env = env} ->
+    | `pattern {pat_desc = pat_desc; pat_env = env} ->
       (match pat_desc with
 	| Tpat_construct ( p, text, _, _) -> f env Constructor p text
 	| Tpat_record (fs, _) ->
 	  List.iter (function ( l, text, _, _) -> f env Label l text) fs
 	| Tpat_alias (_, TPat_type (p, text))-> f env Type p text
 	| _ -> ())
-    | `expression {exp_desc ; exp_env = env; exp_loc} ->
+    | `expression {exp_desc = exp_desc ; exp_env = env; exp_loc = exp_loc} ->
       (match exp_desc with
 	| Texp_ident (p, text, _) -> f env Value p text
 	| Texp_construct (p, text, _, _) -> f env Constructor p text
@@ -242,16 +247,18 @@ let apply2paths f =
           ()
 	| Texp_open (p, text, _) -> f env Module p text
 	| _ -> ())
-    | `class_expr {cl_desc = Tcl_ident (p, text, _) ; cl_env} ->
+    | `class_expr {cl_desc = Tcl_ident (p, text, _) ; cl_env = cl_env} ->
       f cl_env Class p text
-    | `module_expr {mod_desc = Tmod_ident (p, text) ; mod_env; mod_loc} ->
+    | `module_expr {mod_desc = Tmod_ident (p, text) ; mod_env = mod_env;
+                    mod_loc = mod_loc} ->
       f mod_env Module p text
-    | `structure_item {str_desc ; str_env = env} ->
+    | `structure_item {str_desc = str_desc ; str_env = env} ->
       (match str_desc with
 	| Tstr_exn_rebind (_, _, p, text) -> f env Constructor p text
 	| Tstr_open (p, text) -> f env Module p text
 	| _ -> ())
-    | `module_type {mty_desc ; mty_env = env ; mty_type; mty_loc } ->
+    | `module_type {mty_desc = mty_desc; mty_env = env ;
+                    mty_type = mty_type; mty_loc = mty_loc } ->
       (match mty_desc with
 	| Tmty_ident (p, text) -> f env Modtype p text
 	| Tmty_with (_, ps) ->
@@ -267,15 +274,15 @@ let apply2paths f =
 		  f sg_env Module p text ; f env Module p' text')
 	    ps
 	| _ -> ())
-    | `signature_item {sig_desc = Tsig_open (p, text) ; sig_env} ->
+    | `signature_item {sig_desc = Tsig_open (p, text) ; sig_env = sig_env} ->
       f sig_env Module p text
-    | `core_type {ctyp_desc ; ctyp_env = env} ->
+    | `core_type {ctyp_desc = ctyp_desc; ctyp_env = env} ->
       (match ctyp_desc with
 	| Ttyp_constr (p, text, _) -> f env Type p text
 	| Ttyp_class (p, text, _, _) -> f env Type p text
 	| Ttyp_package pt -> f env Modtype pt.pack_name pt.pack_txt
 	| _ -> ())
-    | `class_type {cltyp_desc = Tcty_constr (p, text, _) ; cltyp_env} ->
+    | `class_type {cltyp_desc = Tcty_constr (p, text, _) ; cltyp_env = cltyp_env } ->
       f cltyp_env Cltype p text
     | _ -> ()
 
@@ -307,12 +314,11 @@ let find_all_paths ?(keep_ghosts=false) s =
    - Tcf_val binds values,
    - Tcf_let (unused) *)
 let apply2defs f =
-  let open Env in let open Types in let open Location in let open Env_untyped in
   function
   (* Values *)
   | `pattern {pat_desc =
       Tpat_var (id, text) |
-          Tpat_alias (_, TPat_alias (id, text)) ; pat_type}
+          Tpat_alias (_, TPat_alias (id, text)) ; pat_type = pat_type}
       when Ident.name id <> "*opt*" ->
     let d = DValue { val_type = pat_type ; val_kind = Val_reg } in
     f Value id text d
@@ -351,7 +357,7 @@ let apply2defs f =
       mods
 
   (* Module types *)
-  | `structure_item {str_desc = Tstr_modtype (id, text, {mty_type})} ->
+  | `structure_item {str_desc = Tstr_modtype (id, text, {mty_type = mty_type})} ->
     f Modtype id text (DModtype (Modtype_manifest mty_type))
   | `signature_item {sig_desc = Tsig_modtype (id, text, d)} ->
     let d = match d with
@@ -377,7 +383,8 @@ let apply2defs f =
       | Type_record (fs, _), Ttype_record tfs ->
 	List.iter2
           (fun (_, lbl_mut, lbl_arg) (id, text, _, _, _) ->
-            f Label id text (DLabel {lbl_arg; lbl_mut ; lbl_full = None}))
+            f Label id text (DLabel {lbl_arg = lbl_arg; lbl_mut = lbl_mut ;
+                                     lbl_full = None}))
           fs tfs
       | Type_abstract, Ttype_abstract -> ()
       | _ -> assert false)
@@ -385,11 +392,11 @@ let apply2defs f =
   | `structure_item {str_desc = Tstr_exception (id, text, d)}
   | `signature_item {sig_desc = Tsig_exception (id, text, d)} ->
     let cstr_args = List.map (function t -> t.ctyp_type) d in
-    let d = { cstr_args ; cstr_full = None} in
+    let d = { cstr_args = cstr_args; cstr_full = None} in
     f Constructor id text (DConstructor d)
 
   | `structure_item
-      {str_desc = Tstr_exn_rebind (id, text, p, lid) ; str_env} ->
+      {str_desc = Tstr_exn_rebind (id, text, p, lid) ; str_env = str_env} ->
     let _, d = Env.lookup_constructor lid.txt str_env in
     let d =
       { cstr_args = d.Types.cstr_args ; cstr_full = Some d} in
@@ -400,8 +407,10 @@ let apply2defs f =
     f Cltype c.ci_id_class_type c.ci_id_name (DCltype c.ci_type_decl)
 
   (* Classes *)
-  | `class_declaration {ci_id_name ; ci_id_class ; ci_decl}
-  | `class_description {ci_id_name ; ci_id_class ; ci_decl} ->
+  | `class_declaration {ci_id_name = ci_id_name; ci_id_class = ci_id_class ;
+                        ci_decl = ci_decl}
+  | `class_description {ci_id_name = ci_id_name ; ci_id_class = ci_id_class;
+                        ci_decl = ci_decl} ->
     f Class ci_id_class ci_id_name (DClass ci_decl)
 
   | _ -> ()

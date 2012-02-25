@@ -159,7 +159,7 @@ end = struct
     *)
         | _ ->   expression_desc e.T.pexp_desc
     in
-    { pexp_desc; pexp_loc = e.T.pexp_loc  }
+    { pexp_desc = pexp_desc; pexp_loc = e.T.pexp_loc  }
 
   and expression_desc e =
     match e with
@@ -285,7 +285,7 @@ end = struct
       | T.Pctf_cstr (c1, c2, l) ->
         Pctf_cstr (core_type c1, core_type c2), l
     in
-    { pctf_desc ; pctf_loc }
+    { pctf_desc = pctf_desc; pctf_loc = pctf_loc }
 
 and class_description c = class_infos class_type c
 
@@ -337,7 +337,7 @@ and class_field c =
             (pattern pat, expression e)) list), loc
   | T.Pcf_init e -> Pcf_init (expression e), Location.none
   in
-  { pcf_desc; pcf_loc }
+  { pcf_desc = pcf_desc; pcf_loc = pcf_loc }
 
 and class_declaration list = class_infos class_expr list
 
@@ -408,7 +408,7 @@ and module_expr me =
               ))
           pmod_loc) *)
     | me ->  module_expr_desc me in
-  { pmod_desc; pmod_loc }
+  { pmod_desc = pmod_desc; pmod_loc = pmod_loc }
 
 and module_expr_desc me =
   match me with
@@ -859,7 +859,8 @@ let input_cmi ic =
   let cmi_sign = TYPES.signature cmi_sign in
   let cmi_crcs = (input_value ic : (string * Digest.t) list) in
   let cmi_flags = (input_value ic : V3120_types.Env.pers_flags list) in
-  { Env.cmi_name ; cmi_sign; cmi_crcs; cmi_flags }
+  { Env.cmi_name = cmi_name ; cmi_sign = cmi_sign;
+    cmi_crcs = cmi_crcs; cmi_flags = cmi_flags }
 
 let input_ast_intf ic =
   let input_name = (input_value ic : string) in

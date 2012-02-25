@@ -108,8 +108,8 @@ module Raw = struct
     | _                             -> failwith "expression_of_string"
 end
 
+open Format
   let report_error ppf err loc =
-    let open Format in
         let report ppf err =
           Location.print_error ppf loc;
           match err with

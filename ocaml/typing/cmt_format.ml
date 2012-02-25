@@ -258,7 +258,7 @@ let save_cmt modname filename binary_annots sourcefile packed_modules sg =
           };
           generated = generated f filename
         }
-        | None -> { source_file = {filename; contents = ""} ; generated = None }
+        | None -> { source_file = {filename = filename; contents = ""} ; generated = None }
     in
     output_value oc source_info;
     close_out oc;

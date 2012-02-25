@@ -15,7 +15,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-
+open Location
 open Util
 open OcpLang
 
@@ -83,13 +83,12 @@ let add_white_space gb start ~from token_start t =
     else
       { token = White_space;
         string = String.make length ' ';
-        length } ::
+        length = length } ::
         ts
   in
   let tokens_start, tokens =
     List.fold_right
       (fun (c, loc) (ts_start, ts) ->
-        let open Location in
         let b, e = loc.loc_start.pos_cnum, loc.loc_end.pos_cnum in
         let ts = add_white (ts_start - e) ts in
         let ts =
@@ -102,8 +101,8 @@ let add_white_space gb start ~from token_start t =
           assert (String.sub string 2 (String.length string - 4) = c);
 *)
           { token = Comment;
-            string;
-            length } ::
+            string = string;
+            length = length } ::
             ts
         in
         b, ts)
@@ -291,8 +290,8 @@ let lexer state ~prefix_start ~modified_end ~find_ahead chars =
       []
     else [
       { token = t;
-        string;
-        length }
+        string = string;
+        length = length }
     ]
   in
   let res = add_white_space chars start ~from:current_from token_start t in

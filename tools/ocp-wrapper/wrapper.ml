@@ -191,30 +191,30 @@ let wrap backend compiler args =
   exit code
 
 let options =
-  let open Arg in
-  align [
-    "-save-types", Set save_types,
+(*  let open Arg in *)
+  Arg.align [
+    "-save-types", Arg.Set save_types,
     " Save typedtrees using ocp-type";
 
-    "-no-wrap-camlp4", Clear wrap_camlp4,
+    "-no-wrap-camlp4", Arg.Clear wrap_camlp4,
     " Do not append '-printer Camlp4AstDumper' to camlp4 preprocessor commands ";
 
-    "-save-last-compiled", Set save_last_compiled,
+    "-save-last-compiled", Arg.Set save_last_compiled,
     " (deprecated) backup source file after successful compilation";
 
-    "-with-ocp-type", String (( := ) ocp_type),
+    "-with-ocp-type", Arg.String (( := ) ocp_type),
     " specify the ocp-type command";
 
-    "-with-ocamlc", String (( := ) ocamlc),
+    "-with-ocamlc", Arg.String (( := ) ocamlc),
     " specify the ocamlc command";
 
-    "-with-ocamlopt", String (( := ) ocamlopt),
+    "-with-ocamlopt", Arg.String (( := ) ocamlopt),
     " specify the ocamlopt command";
 
-    "-with-ocamlc.opt", String (( := ) ocamlc_opt),
+    "-with-ocamlc.opt", Arg.String (( := ) ocamlc_opt),
     " specify the ocamlc.opt command";
 
-    "-with-ocamlopt.opt", String (( := ) ocamlopt_opt),
+    "-with-ocamlopt.opt", Arg.String (( := ) ocamlopt_opt),
     " specify the ocamlopt.opt command";
 (*
     "-rtt", Set rtt,
@@ -226,7 +226,7 @@ let options =
   -rtt                 Enable runtime types using the rtt pre-processor
   -nortt               Compile normally with stub implementation of rtt
 *)
-    "-v", Set verbose,
+    "-v", Arg.Set verbose,
     " Print executed commands to error output";
 
     Typerex_config.version;

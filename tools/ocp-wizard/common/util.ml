@@ -15,6 +15,9 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Location
+open Lexing
+
 open Asttypes
 open Longident
 open Format
@@ -33,8 +36,6 @@ let get_c_num loc =
 let lid2string lid = String.concat "." (Longident.flatten lid)
 
 let source_locations file locs =
-  let open Location in
-  let open Lexing in
   match locs with
     | [] -> []
     | _ ->

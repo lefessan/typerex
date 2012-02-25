@@ -31,7 +31,7 @@ begin library "ocplib-lang"
     "stringSet.ml"
     "toposort.ml"
     "ocamllexer.mll"
-    "trie.ml"
+(*    "trie.ml" *)
     "ocpLang.ml"
   ]
 end

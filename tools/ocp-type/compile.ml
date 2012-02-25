@@ -179,9 +179,9 @@ let package_files files targetfile =
     List.map
       (fun f ->
         let f =
-          let open Filename in
-          if check_suffix f ".cmi" then chop_extension f ^ ".cmti"
-          else if check_suffix f ".cmo" then chop_extension f ^ ".cmt"
+(*          let open Filename in *)
+          if Filename.check_suffix f ".cmi" then Filename.chop_extension f ^ ".cmti"
+          else if Filename.check_suffix f ".cmo" then Filename.chop_extension f ^ ".cmt"
           else f
           in
         try find_in_path !Config.load_path f

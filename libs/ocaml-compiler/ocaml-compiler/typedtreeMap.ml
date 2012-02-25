@@ -94,7 +94,7 @@ module MakeMap(Map : MapArgument) : sig
     let rec map_structure str =
       let str = Map.enter_structure str in
       let str_items = List.map map_structure_item str.str_items in
-      Map.leave_structure { str with str_items }
+      Map.leave_structure { str with str_items = str_items }
 
 
     and map_binding (pat, exp) = (map_pattern pat, map_expression exp)
@@ -135,7 +135,7 @@ module MakeMap(Map : MapArgument) : sig
               List.map (fun (ci, string_list, virtual_flag) ->
 		let ci = Map.enter_class_infos ci in
 		let ci_expr = map_class_expr ci.ci_expr in
-		(Map.leave_class_infos { ci with ci_expr }, string_list, virtual_flag)
+		(Map.leave_class_infos { ci with ci_expr = ci_expr}, string_list, virtual_flag)
               ) list
 	    in
 	    Tstr_class list
@@ -143,18 +143,18 @@ module MakeMap(Map : MapArgument) : sig
             let list = List.map (fun (id, name, ct) ->
               let ct = Map.enter_class_infos ct in
               let ci_expr = map_class_type ct.ci_expr in
-	      (id, name, Map.leave_class_infos { ct with ci_expr })
+	      (id, name, Map.leave_class_infos { ct with ci_expr = ci_expr})
             ) list in
 	    Tstr_class_type list
           | Tstr_include (mexpr, idents) ->
             Tstr_include (map_module_expr mexpr, idents)
       in
-      Map.leave_structure_item { item with str_desc }
+      Map.leave_structure_item { item with str_desc = str_desc}
 
     and map_value_description v =
       let v = Map.enter_value_description v in
       let val_desc = map_core_type v.val_desc in
-      Map.leave_value_description { v with val_desc }
+      Map.leave_value_description { v with val_desc = val_desc }
 
     and map_type_declaration decl =
       let decl = Map.enter_type_declaration decl in
@@ -182,7 +182,8 @@ module MakeMap(Map : MapArgument) : sig
             None -> None
           | Some ct -> Some (map_core_type ct)
       in
-      Map.leave_type_declaration { decl with typ_cstrs; typ_kind; typ_manifest }
+      Map.leave_type_declaration { decl with typ_cstrs = typ_cstrs;
+        typ_kind = typ_kind; typ_manifest = typ_manifest }
 
     and map_exception_declaration decl =
       let decl = Map.enter_exception_declaration decl in
@@ -220,7 +221,7 @@ module MakeMap(Map : MapArgument) : sig
           | Tpat_var _ -> pat.pat_desc
 
       in
-      Map.leave_pattern { pat with pat_desc }
+      Map.leave_pattern { pat with pat_desc = pat_desc }
 
     and map_expression exp =
       let exp = Map.enter_expression exp in
@@ -354,17 +355,17 @@ module MakeMap(Map : MapArgument) : sig
 	      may_map map_core_type cto1,
 	      may_map map_core_type cto2)
       in
-      Map.leave_expression { exp with exp_desc }
+      Map.leave_expression { exp with exp_desc = exp_desc }
 
     and map_package_type pack =
       let pack = Map.enter_package_type pack in
       let pack_fields = List.map (fun (s, ct) -> (s, map_core_type ct) ) pack.pack_fields in
-      Map.leave_package_type { pack with pack_fields }
+      Map.leave_package_type { pack with pack_fields = pack_fields }
 
     and map_signature sg =
       let sg = Map.enter_signature sg in
       let sig_items = List.map map_signature_item sg.sig_items in
-      Map.leave_signature { sg with sig_items }
+      Map.leave_signature { sg with sig_items = sig_items }
 
     and map_signature_item item =
       let item = Map.enter_signature_item item in
@@ -389,7 +390,7 @@ module MakeMap(Map : MapArgument) : sig
           | Tsig_class list -> Tsig_class (List.map map_class_description list)
           | Tsig_class_type list -> Tsig_class_type (List.map map_class_type_declaration list)
       in
-      Map.leave_signature_item { item with sig_desc }
+      Map.leave_signature_item { item with sig_desc = sig_desc }
 
     and map_modtype_declaration mdecl =
       let mdecl = Map.enter_modtype_declaration mdecl in
@@ -404,12 +405,12 @@ module MakeMap(Map : MapArgument) : sig
     and map_class_description cd =
       let cd = Map.enter_class_description cd in
       let ci_expr = map_class_type cd.ci_expr in
-      Map.leave_class_description { cd with ci_expr }
+      Map.leave_class_description { cd with ci_expr = ci_expr}
 
     and map_class_type_declaration cd =
       let cd = Map.enter_class_type_declaration cd in
       let ci_expr = map_class_type cd.ci_expr in
-      Map.leave_class_type_declaration { cd with ci_expr }
+      Map.leave_class_type_declaration { cd with ci_expr = ci_expr }
 
     and map_module_type mty =
       let mty = Map.enter_module_type mty in
@@ -427,7 +428,7 @@ module MakeMap(Map : MapArgument) : sig
           | Tmty_typeof mexpr ->
             Tmty_typeof (map_module_expr mexpr)
       in
-      Map.leave_module_type { mty with mty_desc }
+      Map.leave_module_type { mty with mty_desc = mty_desc}
 
     and map_with_constraint cstr =
       let cstr = Map.enter_with_constraint cstr in
@@ -458,7 +459,7 @@ module MakeMap(Map : MapArgument) : sig
             Tmod_unpack (map_expression exp, mod_type)
       (*          map_module_type mty *)
       in
-      Map.leave_module_expr { mexpr with mod_desc }
+      Map.leave_module_expr { mexpr with mod_desc = mod_desc }
 
     and map_class_expr cexpr =
       let cexpr = Map.enter_class_expr cexpr in
@@ -487,7 +488,7 @@ module MakeMap(Map : MapArgument) : sig
           | Tcl_ident (id, name, tyl) ->
             Tcl_ident (id, name, List.map map_core_type tyl)
       in
-      Map.leave_class_expr { cexpr with cl_desc }
+      Map.leave_class_expr { cexpr with cl_desc = cl_desc }
 
     and map_class_type ct =
       let ct = Map.enter_class_type ct in
@@ -499,13 +500,14 @@ module MakeMap(Map : MapArgument) : sig
           | Tcty_fun (label, ct, cl) ->
             Tcty_fun (label, map_core_type ct, map_class_type cl)
       in
-      Map.leave_class_type { ct with cltyp_desc }
+      Map.leave_class_type { ct with cltyp_desc = cltyp_desc }
 
     and map_class_signature cs =
       let cs = Map.enter_class_signature cs in
       let csig_self = map_core_type cs.csig_self in
       let csig_fields = List.map map_class_type_field cs.csig_fields in
-      Map.leave_class_signature { cs with csig_self; csig_fields }
+      Map.leave_class_signature { cs with
+        csig_self = csig_self; csig_fields = csig_fields }
 
 
     and map_class_type_field ctf =
@@ -522,7 +524,7 @@ module MakeMap(Map : MapArgument) : sig
           | Tctf_cstr  (ct1, ct2) ->
             Tctf_cstr (map_core_type ct1, map_core_type ct2)
       in
-      Map.leave_class_type_field { ctf with ctf_desc }
+      Map.leave_class_type_field { ctf with ctf_desc = ctf_desc }
 
     and map_core_type ct =
       let ct = Map.enter_core_type ct in
@@ -541,7 +543,7 @@ module MakeMap(Map : MapArgument) : sig
           | Ttyp_poly (list, ct) -> Ttyp_poly (list, map_core_type ct)
           | Ttyp_package pack -> Ttyp_package (map_package_type pack)
       in
-      Map.leave_core_type { ct with ctyp_desc }
+      Map.leave_core_type { ct with ctyp_desc = ctyp_desc }
 
     and map_core_field_type cft =
       let cft = Map.enter_core_field_type cft in
@@ -549,13 +551,14 @@ module MakeMap(Map : MapArgument) : sig
           Tcfield_var -> Tcfield_var
         | Tcfield (s, ct) -> Tcfield (s, map_core_type ct)
       in
-      Map.leave_core_field_type { cft with field_desc }
+      Map.leave_core_field_type { cft with field_desc = field_desc }
 
     and map_class_structure cs =
       let cs = Map.enter_class_structure cs in
       let cstr_pat = map_pattern cs.cstr_pat in
       let cstr_fields = List.map map_class_field cs.cstr_fields in
-      Map.leave_class_structure { cs with cstr_pat; cstr_fields }
+      Map.leave_class_structure { cs with cstr_pat = cstr_pat;
+        cstr_fields = cstr_fields }
 
     and map_row_field rf =
       match rf with
@@ -584,7 +587,7 @@ module MakeMap(Map : MapArgument) : sig
 	    List.map (fun (id, name, exp) -> (id, name, map_expression exp)) exps)
 	  | Tcf_init exp -> Tcf_init (map_expression exp)
       in
-      Map.leave_class_field { cf with cf_desc }
+      Map.leave_class_field { cf with cf_desc = cf_desc }
 
   end
 

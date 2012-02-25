@@ -15,6 +15,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Env
 open Env_fold
 
 type path_sort =
@@ -90,7 +91,6 @@ type description =
   | DCltype of Types.class_type_declaration
 
 let untyped_lookup =
-  let open Env in
   let wrap lookup ret lid env =
     let path, desc = lookup lid env in path, ret desc in
   function
@@ -125,12 +125,13 @@ let fold f = function
   | Annot -> assert false
   | Constructor ->
     wrap fold_constructors
-      (function {Types.cstr_args} as d ->
-        DConstructor {cstr_args ; cstr_full = Some d}) f
+      (function {Types.cstr_args = cstr_args} as d ->
+        DConstructor {cstr_args = cstr_args; cstr_full = Some d}) f
   | Label ->
     wrap fold_labels
-      (function {Types.lbl_arg; lbl_mut} as d ->
-        DLabel {lbl_arg; lbl_mut ; lbl_full = Some d}) f
+      (function {Types.lbl_arg = lbl_arg; lbl_mut = lbl_mut} as d ->
+        DLabel {lbl_arg = lbl_arg; lbl_mut = lbl_mut ;
+                lbl_full = Some d}) f
   | Type -> wrap fold_types (function d -> DType d) f
   | Module -> wrap fold_modules (function d -> DModule d) f
   | Modtype -> wrap fold_modtypes (function d -> DModtype d) f

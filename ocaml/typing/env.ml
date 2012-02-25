@@ -62,7 +62,7 @@ end  = struct
 
   let makers = ref (StringMap.empty : (Obj.t -> Obj.t) StringMap.t)
 
-  let force : 'a . 'a t -> 'a = function x ->
+  let force x = (* : 'a . 'a t -> 'a = function x -> *)
     match !x with
         Done x -> x
       | Raise e -> raise e

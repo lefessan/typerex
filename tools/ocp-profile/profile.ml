@@ -37,7 +37,7 @@ type state = {
 let initial_state () =
   let init_time = Unix.gettimeofday () in
   {
-    init_time;
+    init_time = init_time;
     stack = ["main", init_time];
     edges = Hashtbl.create 100
   }
@@ -51,7 +51,7 @@ let reinit_state state =
 
 let time_reinit () = reinit_state state
 
-let lookup {edges} e =
+let lookup {edges = edges} e =
   try
     Hashtbl.find edges e
   with Not_found ->
@@ -151,7 +151,7 @@ let time_stats state =
   total_time, node_times
 
 (* Writing data to a file *)
-let write_stats {edges} (total_time, node_times) filename =
+let write_stats {edges = edges} (total_time, node_times) filename =
   let c = open_out filename in
   fprintf c
     "total time: %f, monitored functions: %d\n"

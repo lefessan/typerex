@@ -253,5 +253,5 @@ type 'a loc = {
   loc : t;
 }
 
-let mkloc txt loc = { txt ; loc }
+let mkloc txt loc = { txt=txt ; loc=loc }
 let mknoloc txt = mkloc txt none

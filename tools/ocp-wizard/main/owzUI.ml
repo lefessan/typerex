@@ -15,6 +15,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Typedtree
 open OcpLang
 open Util
 open OcpWizard
@@ -87,25 +88,25 @@ let file_renames ?(for_grep=false) ?prefix program fnames =
   List.concat
     (List.map
        (function f ->
-	 let open Program in
-	     match find_unit program f with
-	       | Concrete unit ->
+(*	 let open Program in *)
+	     match Program.find_unit program f with
+	       | Program.Concrete unit ->
 	         let l =
-	           match unit.interface with
-		     | Some i -> [source ?prefix program i]
+	           match unit.Program.interface with
+		     | Some i -> [Program.source ?prefix program i]
 		     | None -> [] in
-	         (match unit.implementation with
+	         (match unit.Program.implementation with
 	           | Some i
                    (* We check if implem and interf have the same source (.mly) *)
-		       when not (List.mem (source ?prefix program i) l) ->
-		     source ?prefix program i :: l
+		       when not (List.mem (Program.source ?prefix program i) l) ->
+		     Program.source ?prefix program i :: l
 	           | _ -> l)
-	       | Abstract unit ->
-                 if for_grep then [abstract_signature ?prefix program unit]
+	       | Program.Abstract unit ->
+                 if for_grep then [Program.abstract_signature ?prefix program unit]
                  else fail_owz "cannot rename abstract module %s" f
-	       | Pack unit ->
-                 match unit.p_interface with
-		   | Some i -> [source ?prefix program i]
+	       | Program.Pack unit ->
+                 match unit.Program.p_interface with
+		   | Some i -> [Program.source ?prefix program i]
 		   | None -> [])
        fnames)
 
@@ -340,7 +341,7 @@ let colorize buffer_name =
   let buffer = OcamlBuffer.find_or_create buffer_name in
     match buffer.OcamlBuffer.needs_refontifying with
       | Some (start, end_) ->
-        let {OcamlTokenize.OCamlTokenBuffer.chars} = buffer.OcamlBuffer.contents in
+        let {OcamlTokenize.OCamlTokenBuffer.chars = chars} = buffer.OcamlBuffer.contents in
         let start_p = GapBuffer.mark2pos chars start
         and end_p = GapBuffer.mark2pos chars end_ in
         GapBuffer.delete_mark chars start;
@@ -351,15 +352,15 @@ let colorize buffer_name =
       | None -> (0, 0), [], []
 
 let completion buffername pos =
-  let open OcamlBuffer in
+(*  let open OcamlBuffer in *)
   let prefix, candidates =
     try
-      let buffer = Hashtbl.find buffers buffername in
-      let program, source_id = Lazy.force buffer.program in
+      let buffer = Hashtbl.find OcamlBuffer.buffers buffername in
+      let program, source_id = Lazy.force buffer.OcamlBuffer.program in
       let prefix, candidates =
         Completion.completions
-          program source_id buffer.contents buffer.local_envs pos in
-      buffer.last_completion <- candidates;
+          program source_id buffer.OcamlBuffer.contents buffer.OcamlBuffer.local_envs pos in
+      buffer.OcamlBuffer.last_completion <- candidates;
       prefix, candidates
     with _ when !catch_errors -> "", []
   in
@@ -392,7 +393,7 @@ let eliminate_open ~errors program source_id loc =
   let r = (loc, loc+1) in
   debugln "Locating open";
   let loc, typedtree_and_open =
-    let open Typedtree in
+(*    let open Typedtree in *)
     try
       TypedtreeLocate.locate_map_item
         (function loc -> function
@@ -536,7 +537,7 @@ let ignoring_auto_save f =
     ProgramCache.ignore_auto_save := ignore;
     raise e
 
-let program ?check filename = 
+let program ?check filename =
   debugln "filename=%s" filename;
   let file = Filename.basename filename
   and dirname = Filename.dirname filename in

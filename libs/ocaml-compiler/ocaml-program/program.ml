@@ -15,6 +15,8 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Location
+open Lexing
 open OcpLang
 
 type source_file = {
@@ -66,15 +68,14 @@ let rec remove_common_prefix d f =
     | l -> f, l
 
 let prefix_with ?prefix program f =
-  let open Filename in
-  if is_relative f then
+  if Filename.is_relative f then
     match prefix with
-      | Some `absolute -> concat program.root f
+      | Some `absolute -> Filename.concat program.root f
       | Some `subdir d ->
 	let d = String.split d '/' in
 	let f, d = remove_common_prefix d f in
 	List.fold_right
-	  (function _ -> concat parent_dir_name)
+	  (function _ -> Filename.concat Filename.parent_dir_name)
 	  d f
       | None -> f
   else
@@ -100,7 +101,7 @@ let prefix2modname p = String.capitalize (Filename.basename p)
 let source2modname (p, _) = prefix2modname p
 
 let source2string (prefix, kind) =
-  prefix ^ 
+  prefix ^
     match kind with
       | `ml -> ".ml"
       | `mli -> ".mli"
@@ -197,8 +198,7 @@ let modname2filename ?prefix program ?permissive ?load_path kind m =
     | _ -> raise Not_found
 
 let correct_fname pos_fname loc =
-  let open Location in let open Lexing in
-  let correct pos = { pos with pos_fname } in
+  let correct pos = { pos with pos_fname = pos_fname } in
   { loc with
     loc_start = correct loc.loc_start;
     loc_end = correct loc.loc_end }
